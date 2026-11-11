@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'" />
+  <title>Yours Truely – Settings</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="settings">
+  <h1>Settings</h1>
+
+  <section>
+    <h2>1. Your profile <small>saved once, used in every interview</small></h2>
+    <p class="help">Who you are. The answers speak as you and only use experience written here, so be specific: roles, projects, numbers, the stories you like to tell, your strengths, the languages you code in.</p>
+    <textarea id="profile" rows="12" placeholder="Example:
+Name: Akshat. Final-year CS student, 2 internships.
+Internship at Acme (backend, Python/FastAPI): cut API latency 40% by adding Redis caching.
+Project: built a real-time chat app (Node, WebSockets, 2k users).
+Strengths: debugging, explaining things simply. Weakness I talk about: over-polishing.
+Preferred coding language: Python."></textarea>
+  </section>
+
+  <section>
+    <h2>2. This interview <small>change before each one</small></h2>
+    <p class="help">Company, role, round type, job description, interviewer names, anything you know about what they care about.</p>
+    <textarea id="interviewContext" rows="10" placeholder="Example:
+Company: Flipkart. Role: SDE-1 backend. Round: technical + behavioural, 45 min.
+JD: Java/Go, distributed systems, high-traffic services...
+Interviewer: Priya, engineering manager."></textarea>
+    <button id="btnClearContext" class="ghost">Clear interview context</button>
+  </section>
+
+  <section>
+    <h2>3. AI model</h2>
+    <label>Provider
+      <select id="provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai-compatible">Open-source / OpenAI-compatible (Ollama, OpenRouter, LM Studio)</option>
+      </select>
+    </label>
+
+    <div id="anthropicBox">
+      <label>Anthropic API key
+        <input id="anthropicKey" type="password" autocomplete="off" spellcheck="false" />
+      </label>
+      <button id="btnForgetAnthropic" class="ghost">Delete saved key</button>
+      <label>Model
+        <select id="anthropicModel">
+          <option value="claude-haiku-5-5">Claude Haiku 5.5: fastest, cheapest (good default for live use)</option>
+          <option value="claude-sonnet-5-5">Claude Sonnet 5.5: stronger for coding and system design</option>
+          <option value="claude-opus-5-5">Claude Opus 5.5: most capable, slowest</option>
+        </select>
+      </label>
+      <label>Thinking effort
+        <select id="effort">
+          <option value="low">Low: answers start fastest</option>
+          <option value="medium">Medium</option>
+          <option value="high">High: best for hard problems, noticeably slower</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="openaiBox" hidden>
+      <label>Base URL
+        <input id="openaiBaseUrl" spellcheck="false" />
+      </label>
+      <p class="help">Ollama on this PC: <code>http://localhost:11434/v1</code> · OpenRouter: <code>https://openrouter.ai/api/v1</code> · LM Studio: <code>http://localhost:1234/v1</code></p>
+      <label>Model name (must support images)
+        <input id="openaiModel" spellcheck="false" />
+      </label>
+      <p class="help">Ollama examples: <code>qwen2.5vl:7b</code>, <code>llama3.2-vision</code>, <code>gemma3:12b</code>. Pull one first with <code>ollama pull qwen2.5vl:7b</code>.</p>
+      <label>API key (if the server needs one)
+        <input id="openaiKey" type="password" autocomplete="off" spellcheck="false" />
+      </label>
+      <button id="btnForgetOpenai" class="ghost">Delete saved key</button>
+    </div>
+    <p id="encWarn" class="warn" hidden>Windows encryption isn't available, so keys are stored only lightly obscured on this PC.</p>
+  </section>
+
+  <section>
+    <h2>4. Hotkeys</h2>
+    <p class="help">Format: <code>CommandOrControl+Shift+Space</code>, <code>Alt+Q</code>, <code>F8</code>. They work even when another app is focused.</p>
+    <div class="grid">
+      <label>Screenshot + answer <input id="hotkeyAnswer" spellcheck="false" /></label>
+      <label>Type a question <input id="hotkeyType" spellcheck="false" /></label>
+      <label>Show / hide window <input id="hotkeyToggle" spellcheck="false" /></label>
+      <label>New session <input id="hotkeyClear" spellcheck="false" /></label>
+    </div>
+  </section>
+
+  <footer class="savebar">
+    <button id="btnSave" class="primary">Save (Ctrl+S)</button>
+    <span id="saved"></span>
+  </footer>
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:" />
+  <title>Yours Truely</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="overlay">
+  <header class="bar">
+    <span class="title">Yours Truely</span>
+    <span id="status" class="status">Ready</span>
+    <span class="spacer"></span>
+    <button id="btnStop" class="icon only-busy" title="Stop answering">■</button>
+    <button id="btnClear" class="icon" title="New session (forget earlier questions)">⟲</button>
+    <button id="btnSettings" class="icon" title="Settings">⚙</button>
+    <button id="btnHide" class="icon" title="Hide (bring back with the show/hide hotkey)">–</button>
+  </header>
+
+  <main id="answer" class="answer"></main>
+
+  <footer class="composer">
+    <textarea id="note" rows="2" placeholder="Type the question you heard (Enter to send, Shift+Enter for new line)"></textarea>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="withShot" /> include screenshot</label>
+      <span class="spacer"></span>
+      <button id="btnShot" class="primary">Screenshot + answer</button>
+    </div>
+    <div id="hint" class="hint"></div>
+  </footer>
+  <script src="overlay.js"></script>
+</body>
+</html>

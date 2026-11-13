@@ -24,6 +24,7 @@ It's a normal, visible window. It doesn't try to hide from screen sharing or fro
    npm install      # downloads Electron and the AI libraries into node_modules/
    npm start        # compiles the TypeScript and opens the app
    ```
+   Run these inside the folder that contains `package.json`. If you downloaded the ZIP from GitHub instead of cloning, it may unzip as `Yours-Truely-main\Yours-Truely-main\`; go into the inner folder.
 3. To build your own `.exe`: `npm run dist`. It ends up in `release/`.
 
 ### First run
@@ -47,10 +48,12 @@ The Settings window opens automatically:
 You can change all of these in Settings.
 
 **Two ways to ask:**
-- **The question is on screen** (a coding problem, a shared doc, a chat message): press `Ctrl+Shift+Space`.
-- **The question was spoken** (most voice interviews): press `Ctrl+Shift+N`, type a few words such as "why leaving current job" or "design url shortener", and press **Enter**. Tick *include screenshot* if the screen also helps.
+- **The question is on screen** (a coding problem, a shared doc, a chat message): press `Ctrl+Shift+Space` or click **Screenshot + ask**. These always take a screenshot.
+- **The question was spoken** (most voice interviews): press `Ctrl+Shift+N`, type a few words such as "why leaving current job" or "design url shortener", and press **Enter** or click **Send**. These send text only, unless you tick *Send also takes a screenshot*.
 
-If there's text in the box when you press the screenshot hotkey, it's sent along with the screenshot.
+If there's text in the box when you take a screenshot, it's sent along with the screenshot.
+
+If a request fails (network blip, rate limit), a **Retry** button appears. The app also retries automatically twice before showing an error.
 
 **Follow-ups work.** The app remembers the last 6 questions and answers of the session, so "how would you make it faster?" makes sense after a coding answer. Press the new-session hotkey between interviews.
 
@@ -150,8 +153,10 @@ src/
   store.ts         settings file + encrypted API keys
   preload.ts       the safe bridge exposed to the windows as window.api
   renderer/
-    overlay.ts     the answer window (incl. a tiny, HTML-safe Markdown renderer)
+    markdown.ts    a tiny, HTML-safe Markdown renderer for answers
+    overlay.ts     the answer window
     settings.ts    the settings window
+test/              tests for the Markdown renderer (run with `npm test`)
 static/            HTML + CSS for both windows
 .github/workflows/ builds the Windows .exe on every push to main
 ```

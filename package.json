@@ -1,14 +1,30 @@
 {
   "name": "yours-truely",
   "version": "0.1.0",
-  "description": "Practice interview copilot: hotkey screenshot to spoken-style answers",
-  "main": "dist/main.js",
+  "description": "Practice interview copilot for Windows: hotkey screenshot to spoken-style answers",
+  "author": "Akshat Jha",
+  "license": "MIT",
   "private": true,
+  "main": "dist/main.js",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.renderer.json && node scripts/copy-static.js",
     "start": "npm run build && electron .",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
-    "dist": "npm run build && electron-builder --win portable --publish never"
+    "dist": "npm run build && electron-builder --win portable --publish never",
+    "test": "npm run build && node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "openai": "^7.55.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "electron": "^45.3.0",
+    "electron-builder": "^26.18.0",
+    "typescript": "^7.0.2"
   },
   "build": {
     "appId": "dev.local.yours-truely",
@@ -25,15 +41,5 @@
     "directories": {
       "output": "release"
     }
-  },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^1.8.0",
-    "openai": "^7.55.0"
-  },
-  "devDependencies": {
-    "@types/node": "^26.6.6",
-    "electron": "^45.3.0",
-    "electron-builder": "^26.18.0",
-    "typescript": "^7.0.2"
   }
 }

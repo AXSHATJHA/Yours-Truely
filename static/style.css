@@ -50,10 +50,14 @@ body.busy .status { color: var(--accent); }
 
 .composer { border-top: 1px solid var(--line); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .composer textarea { resize: none; }
+.composer .ghost { margin-top: 0; }
 .row { display: flex; align-items: center; gap: 8px; }
 .check { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .check input { width: auto; }
-.hint { color: var(--muted); font-size: 11px; }
+.hint { color: var(--muted); font-size: 11px; display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.hint span { white-space: nowrap; }
+.answer a { color: var(--accent); }
+.answer ol { margin: 6px 0 10px; padding-left: 22px; }
 .hint b { color: var(--text); font-weight: 600; }
 
 /* ---------- settings ---------- */

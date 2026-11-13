@@ -21,13 +21,16 @@
 
   <footer class="composer">
     <textarea id="note" rows="2" placeholder="Type the question you heard (Enter to send, Shift+Enter for new line)"></textarea>
+    <label class="check"><input type="checkbox" id="sendWithShot" /> Send also takes a screenshot</label>
     <div class="row">
-      <label class="check"><input type="checkbox" id="withShot" /> include screenshot</label>
+      <button id="btnRetry" class="ghost" hidden>↻ Retry</button>
       <span class="spacer"></span>
-      <button id="btnShot" class="primary">Screenshot + answer</button>
+      <button id="btnSend">Send</button>
+      <button id="btnShot" class="primary">Screenshot + ask</button>
     </div>
     <div id="hint" class="hint"></div>
   </footer>
+  <script src="markdown.js"></script>
   <script src="overlay.js"></script>
 </body>
 </html>

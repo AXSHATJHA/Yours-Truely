@@ -51,6 +51,9 @@ async function streamAnthropic(input: AskInput): Promise<void> {
   const { settings, keys } = input;
   if (!keys.anthropicKey) throw new Error("No Anthropic API key set. Open Settings and paste your key.");
 
+  // The SDK already retries failed requests twice (rate limits, server errors,
+  // dropped connections) with growing waits before giving up. That covers
+  // failures before the answer starts; the overlay's Retry button covers the rest.
   const client = new Anthropic({ apiKey: keys.anthropicKey });
 
   // Earlier exchanges are sent as plain text only. Re-sending old screenshots
@@ -137,9 +140,19 @@ async function streamOpenAICompatible(input: AskInput): Promise<void> {
     { model: settings.openaiModel, messages, stream: true },
     { signal: input.signal }
   );
+  // finish_reason tells us why the model stopped. "length" means it ran out of
+  // room mid-answer; without this check a cut-off answer would look complete.
+  let finishReason: string | null = null;
   for await (const chunk of stream) {
-    const text = chunk.choices[0]?.delta?.content;
+    const choice = chunk.choices[0];
+    const text = choice?.delta?.content;
     if (text) input.onText(text);
+    if (choice?.finish_reason) finishReason = choice.finish_reason;
+  }
+  if (finishReason === "length") {
+    input.onText("\n\n_(Answer cut off: it hit the length limit. Raise the model's max output in your server settings, or ask for a shorter answer.)_");
+  } else if (finishReason === "content_filter") {
+    input.onText("\n\n_(The model's server filtered this answer.)_");
   }
 }
 

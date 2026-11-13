@@ -98,7 +98,10 @@ function openSettings() {
   blockNavigation(settingsWin);
 }
 
-/** Links inside answers open in the normal browser, never inside the app. */
+/**
+ * Links inside answers (rendered as <a target="_blank">) open in your normal
+ * browser, never inside the app, and the window itself can never navigate away.
+ */
 function blockNavigation(win: BrowserWindow) {
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:/.test(url)) shell.openExternal(url);
@@ -149,6 +152,26 @@ app.on("will-quit", () => globalShortcut.unregisterAll());
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * The screenshot currently being taken, if any.
+ *
+ * Why this exists: a capture hides the overlay, waits, captures, then shows the
+ * overlay again. If two captures overlapped, the first one would show the
+ * overlay again while the second was still capturing, and the overlay would
+ * end up in its own screenshot. So while one capture is running, any other
+ * request simply waits for that same screenshot instead of starting a new one.
+ */
+let captureInFlight: Promise<string> | null = null;
+
+function captureScreen(): Promise<string> {
+  if (!captureInFlight) {
+    captureInFlight = doCapture().finally(() => {
+      captureInFlight = null;
+    });
+  }
+  return captureInFlight;
+}
+
+/**
  * Captures the monitor the mouse is on and returns it as a JPEG (base64).
  *
  * The overlay is made fully transparent for a moment first, otherwise it would
@@ -158,19 +181,19 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * larger images down to about that size anyway, so sending more pixels would
  * only make the upload slower.
  */
-async function captureScreen(): Promise<string> {
+async function doCapture(): Promise<string> {
   const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
   const { width, height } = display.size;
   const scale = display.scaleFactor;
 
-  overlay?.setOpacity(0);
-  await wait(120); // give Windows time to repaint without the overlay
   try {
+    overlay?.setOpacity(0);
+    await wait(120); // give Windows time to repaint without the overlay
     const sources = await desktopCapturer.getSources({
       types: ["screen"],
       thumbnailSize: { width: Math.round(width * scale), height: Math.round(height * scale) },
     });
-    const src = sources.find((s) => s.display_id === String(display.id)) ?? sources[0];
+    const src = pickSource(sources, display);
     if (!src) throw new Error("No screen found to capture.");
     let img = src.thumbnail;
     const size = img.getSize();
@@ -187,6 +210,27 @@ async function captureScreen(): Promise<string> {
   } finally {
     overlay?.setOpacity(1);
   }
+}
+
+/**
+ * Finds the capture source for the monitor the mouse is on.
+ *
+ * Normally each source's `display_id` matches the monitor's id. On some Windows
+ * setups `display_id` comes back empty, so we fall back to matching by
+ * position in the list (Electron lists screens and displays in the same order
+ * in practice). If even that is ambiguous we use the first screen, but say so
+ * in the status line instead of failing silently.
+ */
+function pickSource(sources: Electron.DesktopCapturerSource[], display: Electron.Display) {
+  const byId = sources.find((s) => s.display_id === String(display.id));
+  if (byId) return byId;
+  const displays = screen.getAllDisplays();
+  const index = displays.findIndex((d) => d.id === display.id);
+  if (sources.length === displays.length && index >= 0) return sources[index];
+  if (sources.length > 1) {
+    overlay?.webContents.send("status", "Couldn't tell which monitor you're on; captured the first one.");
+  }
+  return sources[0];
 }
 
 // --------------------------------------------------------------------- ask

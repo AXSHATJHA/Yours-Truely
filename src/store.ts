@@ -58,17 +58,60 @@ interface FileShape extends Partial<Settings> {
 
 const file = () => path.join(app.getPath("userData"), "settings.json");
 
+/**
+ * Reads the settings file.
+ *
+ * If the file is missing, that's a normal first run: return {}.
+ * If it exists but is broken (not valid JSON), we must NOT return {} and carry
+ * on, because the next save would then overwrite your profile and keys with
+ * empty defaults. Instead: set the broken file aside (so nothing is lost and
+ * you can inspect it), then fall back to the last good backup if there is one.
+ */
 function readFile(): FileShape {
+  const f = file();
+  if (!fs.existsSync(f)) return {};
   try {
-    return JSON.parse(fs.readFileSync(file(), "utf8"));
+    return JSON.parse(fs.readFileSync(f, "utf8"));
   } catch {
-    return {};
+    try {
+      fs.renameSync(f, `${f}.corrupt-${Date.now()}`);
+    } catch {
+      /* best effort */
+    }
+    try {
+      const backup = JSON.parse(fs.readFileSync(`${f}.bak`, "utf8"));
+      writeFile(backup); // restore the backup as the live file
+      return backup;
+    } catch {
+      return {};
+    }
   }
 }
 
+/**
+ * Writes the settings file safely ("atomic write").
+ *
+ * Writing straight into settings.json is risky: if the app is killed halfway,
+ * the file is left half-written and unreadable. Instead we:
+ *   1. write the new content to settings.json.tmp,
+ *   2. copy the current good file to settings.json.bak,
+ *   3. rename the .tmp file over settings.json.
+ * A rename either happens completely or not at all, so settings.json is
+ * always either the old version or the new one, never a broken mix.
+ */
 function writeFile(data: FileShape) {
-  fs.mkdirSync(path.dirname(file()), { recursive: true });
-  fs.writeFileSync(file(), JSON.stringify(data, null, 2), "utf8");
+  const f = file();
+  fs.mkdirSync(path.dirname(f), { recursive: true });
+  const tmp = `${f}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), "utf8");
+  if (fs.existsSync(f)) {
+    try {
+      fs.copyFileSync(f, `${f}.bak`);
+    } catch {
+      /* a missing backup shouldn't block saving */
+    }
+  }
+  fs.renameSync(tmp, f);
 }
 
 function encrypt(plain: string): string {

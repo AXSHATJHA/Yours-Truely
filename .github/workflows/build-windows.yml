@@ -1,11 +1,13 @@
 # Builds a portable Windows .exe on GitHub's Windows machines every time you
-# push to main (or when you click "Run workflow" on the Actions tab).
+# push to main, on every pull request (so changes are checked before merging),
+# or when you click "Run workflow" on the Actions tab.
 # Download it from the run's "Artifacts" section.
 name: Build Windows app
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -19,6 +21,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm test
       - run: npm run dist
       - uses: actions/upload-artifact@v4
         with:

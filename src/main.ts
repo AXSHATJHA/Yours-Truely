@@ -21,6 +21,7 @@ import {
   shell,
 } from "electron";
 import path from "path";
+import { supportsCaptureExclusion } from "./platform";
 import { buildSystemPrompt } from "./prompts";
 import { friendlyError, streamAnswer, Turn } from "./providers";
 import { getKeys, getPublicSettings, getSettings, saveSettings, Settings } from "./store";
@@ -51,10 +52,19 @@ function start() {
 
 // ------------------------------------------------------------------ windows
 
+/** True when hiding was asked for *and* this Windows build can actually do it. */
+function shouldHideFromCapture(s: Settings): boolean {
+  return s.hideFromCapture && supportsCaptureExclusion();
+}
+
 function createOverlay() {
   const { workArea } = screen.getPrimaryDisplay();
   const width = 460;
   const height = 540;
+  // Hiding from capture also has to drop the taskbar button: the taskbar is part
+  // of a full-screen share, so an entry called "Yours Truely" would give it away
+  // even when the window itself is invisible to the capture.
+  const hidden = shouldHideFromCapture(getSettings());
   overlay = new BrowserWindow({
     width,
     height,
@@ -64,11 +74,13 @@ function createOverlay() {
     minHeight: 200,
     frame: false, // we draw our own slim title bar
     alwaysOnTop: true, // stays above the meeting window
-    skipTaskbar: false, // a normal, visible app in the taskbar
+    skipTaskbar: hidden, // no taskbar button while hidden from capture
     backgroundColor: "#15171c",
     show: false,
     webPreferences: { preload, contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
+  // Must be set before the window is first shown, or it flashes in the share.
+  overlay.setContentProtection(hidden);
   overlay.setAlwaysOnTop(true, "floating");
   overlay.loadFile(rendererFile("overlay.html"));
   overlay.once("ready-to-show", () => overlay?.show());
@@ -299,6 +311,11 @@ ipcMain.handle(
   (_e, patch: Partial<Settings>, keys: { anthropicKey?: string; openaiKey?: string; groqKey?: string }) => {
     saveSettings(patch, keys);
     const failed = registerHotkeys();
+    // Apply the privacy setting to the window that is already open; createOverlay()
+    // does the same on startup.
+    const hidden = shouldHideFromCapture(getSettings());
+    overlay?.setSkipTaskbar(hidden);
+    overlay?.setContentProtection(hidden);
     overlay?.webContents.send("settings:changed", getPublicSettings());
     return { failedHotkeys: failed };
   }

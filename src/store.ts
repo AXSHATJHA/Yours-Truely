@@ -13,8 +13,10 @@ import { app, safeStorage } from "electron";
 import fs from "fs";
 import path from "path";
 
-export type Provider = "anthropic" | "openai-compatible";
+export type Provider = "anthropic" | "groq" | "openai-compatible";
 export type Effort = "low" | "medium" | "high";
+/** Groq's thinking levels for Qwen. "none" = answer straight away; "default" = the model's normal thinking. */
+export type GroqReasoningEffort = "none" | "low" | "medium" | "high" | "default";
 
 export interface Settings {
   provider: Provider;
@@ -22,6 +24,9 @@ export interface Settings {
   effort: Effort;
   openaiBaseUrl: string;
   openaiModel: string;
+  groqModel: string;
+  groqReasoningEffort: GroqReasoningEffort;
+  groqMaxTokens: number;
   profile: string;
   interviewContext: string;
   hotkeyAnswer: string;
@@ -34,6 +39,7 @@ export interface Settings {
 export interface PublicSettings extends Settings {
   hasAnthropicKey: boolean;
   hasOpenaiKey: boolean;
+  hasGroqKey: boolean;
   encryptionAvailable: boolean;
 }
 
@@ -43,6 +49,11 @@ export const DEFAULTS: Settings = {
   effort: "low",
   openaiBaseUrl: "http://localhost:11434/v1",
   openaiModel: "qwen2.5vl:7b",
+  groqModel: "qwen/qwen3.8-27b",
+  groqReasoningEffort: "default",
+  // Groq's free tier caps output at 1000 tokens per minute, and rejects any
+  // single request that asks for more. 1000 is plenty for a spoken answer.
+  groqMaxTokens: 1000,
   profile: "",
   interviewContext: "",
   hotkeyAnswer: "CommandOrControl+Shift+Space",
@@ -54,6 +65,7 @@ export const DEFAULTS: Settings = {
 interface FileShape extends Partial<Settings> {
   anthropicKeyEnc?: string;
   openaiKeyEnc?: string;
+  groqKeyEnc?: string;
 }
 
 const file = () => path.join(app.getPath("userData"), "settings.json");
@@ -152,6 +164,7 @@ export function getPublicSettings(): PublicSettings {
     ...getSettings(),
     hasAnthropicKey: !!decrypt(data.anthropicKeyEnc),
     hasOpenaiKey: !!decrypt(data.openaiKeyEnc),
+    hasGroqKey: !!decrypt(data.groqKeyEnc),
     encryptionAvailable: safeStorage.isEncryptionAvailable(),
   };
 }
@@ -161,6 +174,7 @@ export function getKeys() {
   return {
     anthropicKey: decrypt(data.anthropicKeyEnc),
     openaiKey: decrypt(data.openaiKeyEnc),
+    groqKey: decrypt(data.groqKeyEnc),
   };
 }
 
@@ -170,7 +184,7 @@ export function getKeys() {
  */
 export function saveSettings(
   patch: Partial<Settings>,
-  keys: { anthropicKey?: string; openaiKey?: string } = {}
+  keys: { anthropicKey?: string; openaiKey?: string; groqKey?: string } = {}
 ) {
   const data = readFile();
   for (const k of Object.keys(DEFAULTS) as (keyof Settings)[]) {
@@ -181,6 +195,9 @@ export function saveSettings(
   }
   if (keys.openaiKey !== undefined) {
     data.openaiKeyEnc = keys.openaiKey ? encrypt(keys.openaiKey.trim()) : undefined;
+  }
+  if (keys.groqKey !== undefined) {
+    data.groqKeyEnc = keys.groqKey ? encrypt(keys.groqKey.trim()) : undefined;
   }
   writeFile(data);
 }

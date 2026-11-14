@@ -35,6 +35,7 @@ Interviewer: Priya, engineering manager."></textarea>
     <label>Provider
       <select id="provider">
         <option value="anthropic">Anthropic (Claude)</option>
+        <option value="groq">Groq (Qwen 3.8 27B: very fast, free tier available)</option>
         <option value="openai-compatible">Open-source / OpenAI-compatible (Ollama, OpenRouter, LM Studio)</option>
       </select>
     </label>
@@ -58,6 +59,31 @@ Interviewer: Priya, engineering manager."></textarea>
           <option value="high">High: best for hard problems, noticeably slower</option>
         </select>
       </label>
+    </div>
+
+    <div id="groqBox" hidden>
+      <label>Groq API key
+        <input id="groqKey" type="password" autocomplete="off" spellcheck="false" />
+      </label>
+      <p class="help">Create one at <code>console.groq.com</code> → API Keys. It starts with <code>gsk_</code>.</p>
+      <button id="btnForgetGroq" class="ghost">Delete saved key</button>
+      <label>Model
+        <input id="groqModel" spellcheck="false" />
+      </label>
+      <p class="help"><code>qwen/qwen3.8-27b</code> can read screenshots. If you switch to a text-only Groq model, use "Type a question" instead of screenshots.</p>
+      <label>Thinking
+        <select id="groqReasoningEffort">
+          <option value="default">Default: the model decides how much to think</option>
+          <option value="none">None: answers start fastest</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High: best for hard problems, slower, uses more tokens</option>
+        </select>
+      </label>
+      <label>Max answer length (tokens)
+        <input id="groqMaxTokens" type="number" min="100" max="16384" step="100" />
+      </label>
+      <p class="help">Thinking counts toward this limit. Groq's free tier rejects requests above about 1000 tokens per minute, so keep 1000 unless you've upgraded.</p>
     </div>
 
     <div id="openaiBox" hidden>

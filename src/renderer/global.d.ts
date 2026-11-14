@@ -15,10 +15,12 @@ interface PublicSettings {
   hotkeyToggle: string;
   hotkeyClear: string;
   hotkeyType: string;
+  hideFromCapture: boolean;
   hasAnthropicKey: boolean;
   hasOpenaiKey: boolean;
   hasGroqKey: boolean;
   encryptionAvailable: boolean;
+  captureExclusionSupported: boolean;
 }
 
 interface Window {

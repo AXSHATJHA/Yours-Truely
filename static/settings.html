@@ -114,6 +114,13 @@ Interviewer: Priya, engineering manager."></textarea>
     </div>
   </section>
 
+  <section>
+    <h2>5. Screen sharing <small>off by default</small></h2>
+    <label class="check"><input type="checkbox" id="hideFromCapture" /> Hide this window from screen capture</label>
+    <p class="help">When this is on, Windows leaves the answer window out of screen shares and recordings, so it does not appear when you share your <b>entire screen</b>. It stays visible on your own monitor so you can read it, and its taskbar button is removed too (the taskbar is part of a full-screen share). It needs Windows 10 version 2004 or newer.</p>
+    <p id="captureUnsupported" class="warn" hidden>This PC's Windows build can't hide a window from screen capture, so this setting has no effect here.</p>
+  </section>
+
   <footer class="savebar">
     <button id="btnSave" class="primary">Save (Ctrl+S)</button>
     <span id="saved"></span>

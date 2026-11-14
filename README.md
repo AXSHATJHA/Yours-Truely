@@ -2,7 +2,7 @@
 
 A Windows desktop copilot for **practice and mock interviews**. Press a hotkey and it takes a screenshot of your screen, reads the question with a vision AI model, and shows an answer written to be **said out loud**: one opening sentence, then a few short talking points.
 
-It's a normal, visible window. It doesn't try to hide from screen sharing or from the meeting app.
+It's a normal window. By default it is **not** hidden from screen sharing or from the meeting app; there is an optional setting that keeps it out of screen capture on Windows (see section 2).
 
 ![The answer window](docs/overlay.png)
 
@@ -58,6 +58,21 @@ If a request fails (network blip, rate limit), a **Retry** button appears. The a
 **Follow-ups work.** The app remembers the last 6 questions and answers of the session, so "how would you make it faster?" makes sense after a coding answer. Press the new-session hotkey between interviews.
 
 **Reading the answer:** the yellow **Say:** line is your opening sentence, so say it right away to buy a few seconds. The bullets are what to cover next, in order. **If they push:** is a ready follow-up.
+
+### Hiding the window from a screen share (optional)
+
+Settings → **5. Screen sharing** → *Hide this window from screen capture*.
+
+When it's on, Windows leaves the answer window out of screen capture, so it doesn't appear when you share your **entire screen** in Meet, Zoom or Teams, or when you record your screen. It stays visible on your own monitor so you can read it, and the app removes its taskbar button too, because the taskbar is part of a full-screen share. It is **off by default**.
+
+It needs **Windows 10 version 2004 (build 19041) or newer**. On older builds Windows rejects the flag and leaves the window fully capturable, so the checkbox is disabled there rather than pretending to work.
+
+What it can't do:
+- It does not hide the window from a phone camera pointed at your screen, an external capture card, or someone else in the room.
+- It only defeats *screen capture*. Software that lists the programs running on your PC still sees the app.
+- If you share a single window (your editor, a doc) rather than the entire screen, the answer window was never part of that share in the first place.
+
+Using AI help in a real interview usually breaks the employer's or the assessment's rules, and getting caught can cost you the offer.
 
 ---
 
@@ -166,14 +181,15 @@ src/
   think.ts         hides <think>…</think> reasoning if a model writes it into the answer
   prompts.ts       the voice-answer rules and how the system prompt is assembled
   store.ts         settings file + encrypted API keys
+  platform.ts      OS capability check: can this Windows hide a window from capture?
   preload.ts       the safe bridge exposed to the windows as window.api
   renderer/
     markdown.ts    a tiny, HTML-safe Markdown renderer for answers
     overlay.ts     the answer window
     settings.ts    the settings window
-test/              tests for the Markdown renderer and <think> filter (run with `npm test`)
+test/              tests for the renderer, the <think> filter and the capture check (`npm test`)
 static/            HTML + CSS for both windows
-.github/workflows/ builds the Windows .exe on every push to main
+.github/workflows/ builds the Windows .exe on pushes to main and on pull requests
 ```
 
 To change **how answers sound**, edit `VOICE_RULES` in `src/prompts.ts`. That's the most useful file to tweak.

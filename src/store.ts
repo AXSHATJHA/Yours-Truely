@@ -12,6 +12,7 @@
 import { app, safeStorage } from "electron";
 import fs from "fs";
 import path from "path";
+import { supportsCaptureExclusion } from "./platform";
 
 export type Provider = "anthropic" | "groq" | "openai-compatible";
 export type Effort = "low" | "medium" | "high";
@@ -33,6 +34,8 @@ export interface Settings {
   hotkeyToggle: string;
   hotkeyClear: string;
   hotkeyType: string;
+  /** Keep the answer window out of screen shares and recordings (off by default). */
+  hideFromCapture: boolean;
 }
 
 /** What the settings window sees: real keys are never sent back, only whether one is set. */
@@ -41,6 +44,8 @@ export interface PublicSettings extends Settings {
   hasOpenaiKey: boolean;
   hasGroqKey: boolean;
   encryptionAvailable: boolean;
+  /** False on Windows builds that can't hide a window from capture, so the UI can say so. */
+  captureExclusionSupported: boolean;
 }
 
 export const DEFAULTS: Settings = {
@@ -60,6 +65,7 @@ export const DEFAULTS: Settings = {
   hotkeyToggle: "CommandOrControl+Shift+H",
   hotkeyClear: "CommandOrControl+Shift+Backspace",
   hotkeyType: "CommandOrControl+Shift+N",
+  hideFromCapture: false,
 };
 
 interface FileShape extends Partial<Settings> {
@@ -166,6 +172,7 @@ export function getPublicSettings(): PublicSettings {
     hasOpenaiKey: !!decrypt(data.openaiKeyEnc),
     hasGroqKey: !!decrypt(data.groqKeyEnc),
     encryptionAvailable: safeStorage.isEncryptionAvailable(),
+    captureExclusionSupported: supportsCaptureExclusion(),
   };
 }
 

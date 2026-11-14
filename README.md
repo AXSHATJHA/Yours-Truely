@@ -31,7 +31,7 @@ It's a normal, visible window. It doesn't try to hide from screen sharing or fro
 The Settings window opens automatically:
 1. **Your profile**: who you are (details in section 3).
 2. **This interview**: company, role, job description.
-3. **AI model**: paste your Anthropic API key (from <https://console.anthropic.com> → API Keys) or set up an open-source model (section 5).
+3. **AI model**: paste your Anthropic API key (from <https://console.anthropic.com> → API Keys), or pick **Groq** and paste a Groq key (section 5), or set up an open-source model (section 5).
 4. Click **Save**.
 
 ---
@@ -91,9 +91,23 @@ For Sonnet and Opus the app also turns on Anthropic's **server-side fallback**: 
 
 ---
 
-## 5. Open-source models (free, run on your own PC)
+## 5. Groq and open-source models
 
-The second provider speaks the "OpenAI-compatible" API. That's a request format many tools copy, so one setting covers several options:
+### Groq (hosted Qwen 3.8 27B, very fast, has a free tier)
+Groq runs open models on its own chips, which makes answers start in well under a second.
+1. Get a key at <https://console.groq.com> → API Keys (it starts with `gsk_`).
+2. In Settings choose **Groq**, paste the key, keep the model `qwen/qwen3.8-27b`, click **Save**.
+
+Settings, and why they exist:
+- **Thinking**: Qwen 3.8 is a *reasoning* model, meaning it can think privately before answering. `Default` lets it decide; `None` answers straight away (fastest); `High` is best for hard coding problems but slower. The thinking itself is hidden: you only see the answer.
+- **Max answer length (tokens)**: a hard cap on the reply. Thinking counts toward it. On Groq's free tier the account is limited to about **1000 output tokens per minute**, and Groq rejects any request that *asks* for more than that, even before answering. So the default is 1000. If you upgrade your Groq plan, you can raise it.
+- **Screenshots work**: `qwen/qwen3.8-27b` accepts images (up to 3 per request; the app sends one). If you switch to a text-only Groq model, use "Type a question" instead.
+
+Compared with Claude: Groq + Qwen is faster and cheaper; Claude is usually stronger on tricky coding and system design, and follows the answer format a little more reliably.
+
+### Open-source / OpenAI-compatible
+
+This provider speaks the "OpenAI-compatible" API. That's a request format many tools copy, so one setting covers several options:
 
 ### Ollama (local, free)
 1. Install from <https://ollama.com>.
@@ -148,7 +162,8 @@ Some terms used above:
 ```
 src/
   main.ts          windows, hotkeys, screenshot, the ask() pipeline
-  providers.ts     Anthropic + OpenAI-compatible streaming, error messages
+  providers.ts     Anthropic, Groq + OpenAI-compatible streaming, error messages
+  think.ts         hides <think>…</think> reasoning if a model writes it into the answer
   prompts.ts       the voice-answer rules and how the system prompt is assembled
   store.ts         settings file + encrypted API keys
   preload.ts       the safe bridge exposed to the windows as window.api
@@ -156,7 +171,7 @@ src/
     markdown.ts    a tiny, HTML-safe Markdown renderer for answers
     overlay.ts     the answer window
     settings.ts    the settings window
-test/              tests for the Markdown renderer (run with `npm test`)
+test/              tests for the Markdown renderer and <think> filter (run with `npm test`)
 static/            HTML + CSS for both windows
 .github/workflows/ builds the Windows .exe on every push to main
 ```
@@ -171,6 +186,8 @@ To change **how answers sound**, edit `VOICE_RULES` in `src/prompts.ts`. That's 
 |---|---|
 | "Hotkey not available" | Another app already uses that combination. Pick another in Settings, e.g. `Alt+Q` or `F8`. |
 | "Anthropic rejected the API key" | Re-paste the key. Check you have credit at console.anthropic.com. |
+| "Groq's per-minute token limit … is lower than this request needs" | Lower **Max answer length** to 1000 or less (free tier), or wait a minute. |
+| "Groq rejected the API key" | Re-paste the key from console.groq.com. |
 | "Couldn't reach the open-source model server" | Start Ollama (it runs in the system tray) and check the Base URL. |
 | Answer is about the wrong thing | Type the question in the box. A screenshot alone can't hear a spoken question. |
 | Overlay covers the question | Drag it by its title bar, or hide it with `Ctrl+Shift+H` before capturing. |

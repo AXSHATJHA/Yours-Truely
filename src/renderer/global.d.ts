@@ -1,11 +1,14 @@
 // Types for `window.api`, the bridge defined in src/preload.ts.
 
 interface PublicSettings {
-  provider: "anthropic" | "openai-compatible";
+  provider: "anthropic" | "groq" | "openai-compatible";
   anthropicModel: string;
   effort: "low" | "medium" | "high";
   openaiBaseUrl: string;
   openaiModel: string;
+  groqModel: string;
+  groqReasoningEffort: "none" | "low" | "medium" | "high" | "default";
+  groqMaxTokens: number;
   profile: string;
   interviewContext: string;
   hotkeyAnswer: string;
@@ -14,6 +17,7 @@ interface PublicSettings {
   hotkeyType: string;
   hasAnthropicKey: boolean;
   hasOpenaiKey: boolean;
+  hasGroqKey: boolean;
   encryptionAvailable: boolean;
 }
 
@@ -28,7 +32,7 @@ interface Window {
     getSettings(): Promise<PublicSettings>;
     saveSettings(
       patch: Partial<PublicSettings>,
-      keys: { anthropicKey?: string; openaiKey?: string }
+      keys: { anthropicKey?: string; openaiKey?: string; groqKey?: string }
     ): Promise<{ failedHotkeys: string[] }>;
     on(event: string, fn: (...args: any[]) => void): void;
   };

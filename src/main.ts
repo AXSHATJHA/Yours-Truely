@@ -46,7 +46,7 @@ function start() {
   registerHotkeys();
   const s = getPublicSettings();
   // First run: nothing configured yet, so open Settings straight away.
-  if (!s.hasAnthropicKey && s.provider === "anthropic") openSettings();
+  if ((s.provider === "anthropic" && !s.hasAnthropicKey) || (s.provider === "groq" && !s.hasGroqKey)) openSettings();
 }
 
 // ------------------------------------------------------------------ windows
@@ -296,7 +296,7 @@ ipcMain.handle("quit", () => app.quit());
 ipcMain.handle("settings:get", () => getPublicSettings());
 ipcMain.handle(
   "settings:save",
-  (_e, patch: Partial<Settings>, keys: { anthropicKey?: string; openaiKey?: string }) => {
+  (_e, patch: Partial<Settings>, keys: { anthropicKey?: string; openaiKey?: string; groqKey?: string }) => {
     saveSettings(patch, keys);
     const failed = registerHotkeys();
     overlay?.webContents.send("settings:changed", getPublicSettings());

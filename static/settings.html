@@ -121,10 +121,35 @@ Interviewer: Priya, engineering manager."></textarea>
     <p id="captureUnsupported" class="warn" hidden>This PC's Windows build can't hide a window from screen capture, so this setting has no effect here.</p>
   </section>
 
+  <section>
+    <h2>6. Voice <small>listens to the meeting and transcribes it</small></h2>
+    <p class="help">Press the 🎙 button (or the hotkey) to start listening. The app records what your PC plays, so the interviewer's voice in Meet, Zoom or Teams, turns it into text with Groq Whisper, and shows it in the answer window. "Answer from audio" sends that text to the AI, like a typed question. Nothing is recorded until you press Listen, and audio is never saved to disk.</p>
+    <p id="voiceKeyWarn" class="warn" hidden>Voice needs a Groq API key for transcription, even if answers come from Claude. Add one under 3. AI model → Groq (choose Groq, paste the key, Save, then switch back if you like).</p>
+    <div class="grid">
+      <label>Listen on / off <input id="hotkeyListen" spellcheck="false" /></label>
+      <label>Answer from audio <input id="hotkeyAnswerAudio" spellcheck="false" /></label>
+    </div>
+    <label>Speech model
+      <select id="voiceModel">
+        <option value="whisper-large-v3-turbo">whisper-large-v3-turbo: fast, $0.04 per hour of audio (default)</option>
+        <option value="whisper-large-v3">whisper-large-v3: a bit more accurate, slower, $0.111 per hour</option>
+      </select>
+    </label>
+    <label>Spoken language (2-letter code, e.g. <code>en</code>, <code>hi</code>; leave empty to auto-detect)
+      <input id="voiceLanguage" spellcheck="false" maxlength="5" />
+    </label>
+    <label class="check"><input type="checkbox" id="voiceIncludeMic" /> Also transcribe my microphone (shown as "Me")</label>
+    <p class="help">Use headphones if you turn this on: without them your mic also hears the interviewer from your speakers, and their words appear twice.</p>
+    <label class="check"><input type="checkbox" id="voiceAutoAnswer" /> Answer automatically when the interviewer pauses after a question</label>
+    <p class="help">Off by default: it can fire on small talk and uses more of Groq's and your AI provider's quota.</p>
+    <p id="voiceSaved"></p>
+  </section>
+
   <footer class="savebar">
     <button id="btnSave" class="primary">Save (Ctrl+S)</button>
     <span id="saved"></span>
   </footer>
   <script src="settings.js"></script>
+  <script src="voice-settings.js"></script>
 </body>
 </html>

@@ -25,6 +25,7 @@ import { supportsCaptureExclusion } from "./platform";
 import { buildSystemPrompt } from "./prompts";
 import { friendlyError, streamAnswer, Turn } from "./providers";
 import { getKeys, getPublicSettings, getSettings, saveSettings, Settings } from "./store";
+import { setupVoice, voiceHotkeys } from "./voice";
 
 let overlay: BrowserWindow | null = null;
 let settingsWin: BrowserWindow | null = null;
@@ -44,6 +45,7 @@ if (!app.requestSingleInstanceLock()) {
 
 function start() {
   createOverlay();
+  setupVoice({ getOverlay: () => overlay, ask, rendererFile, preload }); // voice feature, see src/voice.ts
   registerHotkeys();
   const s = getPublicSettings();
   // First run: nothing configured yet, so open Settings straight away.
@@ -153,6 +155,7 @@ function registerHotkeys(): string[] {
     overlay.focus();
     overlay.webContents.send("hotkey:type");
   });
+  for (const [accel, fn] of voiceHotkeys(s)) bind(accel, fn); // voice: listen + answer from audio
   if (failed.length) overlay?.webContents.send("status", `Hotkey not available: ${failed.join(", ")}. Change it in Settings.`);
   return failed;
 }

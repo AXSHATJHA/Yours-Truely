@@ -59,6 +59,18 @@ If a request fails (network blip, rate limit), a **Retry** button appears. The a
 
 **Reading the answer:** the yellow **Say:** line is your opening sentence, so say it right away to buy a few seconds. The bullets are what to cover next, in order. **If they push:** is a ready follow-up.
 
+### Listening to the meeting (voice)
+
+Press **🎙** in the title bar (or `Ctrl+Shift+L`) and the app starts listening to whatever your PC is playing, which includes the interviewer's voice in Meet, Zoom or Teams. What it hears appears as text in a strip under the title bar a second or two after each sentence. When a question has been asked, press **Answer from audio** (or `Ctrl+Shift+Enter`): the transcript since your last answer is sent to the AI exactly like a typed question, so you get the usual Say line and bullets. Press 🎙 again to stop.
+
+- **It needs a Groq API key** for the speech-to-text, even if your answers come from Claude (section 5 shows how to get one; it's free to start). Transcription costs about $0.04 per hour of audio on `whisper-large-v3-turbo`.
+- **Nothing is recorded until you press Listen**, and it's off every time the app starts. A red dot shows while it's on. Audio stays in memory and goes only to Groq; nothing is saved to disk.
+- **Your microphone is off by default.** Turn it on in Settings → 6. Voice to have your own words transcribed too (shown as "Me"). Use headphones then, or your mic also hears the interviewer through your speakers.
+- **Auto-answer** (Settings → 6. Voice, off by default) answers by itself when the interviewer pauses after something that sounds like a question.
+- If "Send also takes a screenshot" is ticked, Answer from audio adds a screenshot too.
+- New session (`Ctrl+Shift+Backspace`) also clears the transcript.
+- It captures *all* sound your PC plays: close music or videos first, or they'll be transcribed as well.
+
 ### Hiding the window from a screen share (optional)
 
 Settings → **5. Screen sharing** → *Hide this window from screen capture*.
@@ -182,12 +194,18 @@ src/
   prompts.ts       the voice-answer rules and how the system prompt is assembled
   store.ts         settings file + encrypted API keys
   platform.ts      OS capability check: can this Windows hide a window from capture?
+  voice.ts         voice: start/stop listening, rolling transcript, "Answer from audio"
+  voice-audio.ts   voice: resample to 16 kHz, cut at pauses, WAV files (pure, tested)
+  transcribe.ts    voice: sends one WAV piece to Groq Whisper
   preload.ts       the safe bridge exposed to the windows as window.api
   renderer/
     markdown.ts    a tiny, HTML-safe Markdown renderer for answers
     overlay.ts     the answer window
     settings.ts    the settings window
-test/              tests for the renderer, the <think> filter and the capture check (`npm test`)
+    voice-capture.ts  hidden window that captures meeting audio (+ optional mic)
+    voice-ui.ts    the 🎙 button and transcript strip in the answer window
+    voice-settings.ts  the Voice section of Settings
+test/              tests for the renderer, the <think> filter, the capture check and the voice audio helpers (`npm test`)
 static/            HTML + CSS for both windows
 .github/workflows/ builds the Windows .exe on pushes to main and on pull requests
 ```
@@ -206,6 +224,9 @@ To change **how answers sound**, edit `VOICE_RULES` in `src/prompts.ts`. That's 
 | "Groq rejected the API key" | Re-paste the key from console.groq.com. |
 | "Couldn't reach the open-source model server" | Start Ollama (it runs in the system tray) and check the Base URL. |
 | Answer is about the wrong thing | Type the question in the box. A screenshot alone can't hear a spoken question. |
+| "Voice needs a Groq API key" | Add a Groq key in Settings → 3. AI model → Groq and Save. You can switch the provider back to Anthropic afterwards; the key stays saved. |
+| Listening, but no text appears | Check sound is actually playing through your default output device (the one Windows shows in the taskbar volume menu). Sound from a different device isn't captured. |
+| Your own words appear twice | You turned on the microphone without headphones. Use headphones, or turn the mic off in Settings → 6. Voice. |
 | Overlay covers the question | Drag it by its title bar, or hide it with `Ctrl+Shift+H` before capturing. |
 
 ## License

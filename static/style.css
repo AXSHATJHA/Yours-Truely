@@ -76,3 +76,19 @@ label > input, label > select { margin-top: 4px; color: var(--text); }
 .ok { color: var(--ok); }
 .warn { color: var(--warn); }
 [hidden] { display: none !important; }
+
+/* ---------- voice (src/renderer/voice-ui.ts) ---------- */
+.listen[aria-pressed="true"] { border-color: var(--err); color: var(--err); }
+.voice { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; background: transparent; padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; }
+.voice-head { display: flex; align-items: center; gap: 8px; }
+.voice-head button { padding: 3px 10px; font-size: 12px; }
+.voice-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+body.listening .voice-dot { background: var(--err); }
+.voice-status { color: var(--muted); font-size: 12px; }
+.voice-status.error { color: var(--warn); }
+.voice-transcript { max-height: 110px; overflow-y: auto; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.vline { margin: 1px 0; }
+.vline b { font-weight: 600; }
+.vline.fresh { color: var(--text); }
+.vline.me b { color: var(--accent); }
+.vline.pending { color: var(--muted); }

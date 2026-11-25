@@ -36,6 +36,18 @@ export interface Settings {
   hotkeyType: string;
   /** Keep the answer window out of screen shares and recordings (off by default). */
   hideFromCapture: boolean;
+  /** Voice (see src/voice.ts): start/stop listening to the meeting. */
+  hotkeyListen: string;
+  /** Voice: send what was heard to the AI. */
+  hotkeyAnswerAudio: string;
+  /** Voice: also transcribe your microphone, labelled "Me". */
+  voiceIncludeMic: boolean;
+  /** Voice: Groq speech-to-text model. */
+  voiceModel: string;
+  /** Voice: spoken language as a 2-letter code ("en"); empty lets Whisper guess. */
+  voiceLanguage: string;
+  /** Voice: answer by itself when the interviewer pauses after a question. */
+  voiceAutoAnswer: boolean;
 }
 
 /** What the settings window sees: real keys are never sent back, only whether one is set. */
@@ -66,6 +78,12 @@ export const DEFAULTS: Settings = {
   hotkeyClear: "CommandOrControl+Shift+Backspace",
   hotkeyType: "CommandOrControl+Shift+N",
   hideFromCapture: false,
+  hotkeyListen: "CommandOrControl+Shift+L",
+  hotkeyAnswerAudio: "CommandOrControl+Shift+Enter",
+  voiceIncludeMic: false,
+  voiceModel: "whisper-large-v3-turbo",
+  voiceLanguage: "en",
+  voiceAutoAnswer: false,
 };
 
 interface FileShape extends Partial<Settings> {

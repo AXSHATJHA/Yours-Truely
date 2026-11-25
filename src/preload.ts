@@ -32,3 +32,23 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on(event, (_e: IpcRendererEvent, ...args: unknown[]) => fn(...args));
   },
 });
+
+// ------------------------------------------------------------------ voice
+// A separate bridge for the voice feature (src/voice.ts), exposed as
+// `window.voice`, so `window.api` above stays exactly as it was.
+const VOICE_EVENTS = ["voice:state", "voice:transcript", "voice:hotkey-answer"] as const;
+
+contextBridge.exposeInMainWorld("voice", {
+  toggle: () => ipcRenderer.invoke("voice:toggle"),
+  answer: (opts: { screenshot: boolean }) => ipcRenderer.invoke("voice:answer", opts),
+  clear: () => ipcRenderer.invoke("voice:clear"),
+  getState: () => ipcRenderer.invoke("voice:get-state"),
+  // Used only by the hidden capture window; the main process ignores these from any other window.
+  sendAudio: (who: "them" | "me", samples: Float32Array, sampleRate: number) =>
+    ipcRenderer.send("voice:audio", who, samples, sampleRate),
+  captureEnded: (message: string) => ipcRenderer.send("voice:capture-ended", message),
+  on: (event: (typeof VOICE_EVENTS)[number], fn: (...args: unknown[]) => void) => {
+    if (!VOICE_EVENTS.includes(event)) return;
+    ipcRenderer.on(event, (_e: IpcRendererEvent, ...args: unknown[]) => fn(...args));
+  },
+});

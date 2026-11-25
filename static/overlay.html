@@ -11,11 +11,23 @@
     <span class="title">Yours Truely</span>
     <span id="status" class="status">Ready</span>
     <span class="spacer"></span>
+    <button id="btnListen" class="icon listen" title="Listen to the meeting" aria-pressed="false">🎙</button>
     <button id="btnStop" class="icon only-busy" title="Stop answering">■</button>
     <button id="btnClear" class="icon" title="New session (forget earlier questions)">⟲</button>
     <button id="btnSettings" class="icon" title="Settings">⚙</button>
     <button id="btnHide" class="icon" title="Hide (bring back with the show/hide hotkey)">–</button>
   </header>
+
+  <section id="voiceStrip" class="voice" hidden>
+    <div class="voice-head">
+      <span class="voice-dot"></span>
+      <span id="voiceStatus" class="voice-status">Listening…</span>
+      <span class="spacer"></span>
+      <button id="btnVoiceAnswer" class="primary">Answer from audio</button>
+    </div>
+    <div id="voiceTranscript" class="voice-transcript"></div>
+    <div id="voiceHint" class="hint"></div>
+  </section>
 
   <main id="answer" class="answer"></main>
 
@@ -32,5 +44,6 @@
   </footer>
   <script src="markdown.js"></script>
   <script src="overlay.js"></script>
+  <script src="voice-ui.js"></script>
 </body>
 </html>
